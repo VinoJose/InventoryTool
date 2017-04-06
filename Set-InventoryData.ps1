@@ -176,15 +176,40 @@ foreach ($Item in $Input){
                 Param (
                     $Path ,$Headers,$Item
                 )
-            
+                $FileName = "WoN_$(get-date -Format ddmmyyyy-hhMMss)"
+                $RegBackup = "C:\RegBackup"
                 ForEach($Header in $Headers)
                 {
-                    If(($Header -ne "ServerName") -and ($Item.($Header) -ne $Null) -and ($Item.($Header) -ne ""))
+                    If(($Header -ne "ServerName") -and ($Item.($Header) -ne $NUll) -and ($Item.($Header) -ne ""))
                     {
-                        Set-ItemProperty -Path $Path -Name $Header -Value $Item.($Header)
+                        If($Header -eq "Build")
+                        {
+                            If(Test-Path -Path HKLM:\SOFTWARE\WoN\Build) {
+                                $Backup = &Reg export HKLM:\SOFTWARE\WoN\Build "$RegBackup\$FileName.reg"
+                                Set-ItemProperty -Path HKLM:\SOFTWARE\WoN\Build -Name $Header -Value $Item.($Header)
+                            }
+                            ElseIf(Test-Path -Path HKLM:\SOFTWARE\WoN) {
+                                $Null = new-item -Path HKLM:\SOFTWARE -Name "Build"
+                                Sleep 5
+                                Set-ItemProperty -Path HKLM:\SOFTWARE\WoN\Build -Name $Header -Value $Item.($Header)
+                            }
+                            ElseIf(Test-Path -Path HKLM:\SOFTWARE) {
+                                $Null = new-item -Path HKLM:\SOFTWARE -Name "WoN"
+                                Sleep 5
+                                $Null = new-item -Path HKLM:\SOFTWARE\WoN -Name "Build"
+                                Sleep 5
+                                Set-ItemProperty -Path HKLM:\SOFTWARE\WoN\Build -Name $Header -Value $Item.($Header)
+                            }
+
+                        }
+                        Else
+                        {
+                            Set-ItemProperty -Path $Path -Name $Header -Value $Item.($Header)
+                        }
+
                     }
                 } 
-            }
+            }  
             If(Test-Path -Path HKLM:\SOFTWARE\Wipro\Computer) {
                 Reg-Backup -Path HKLM\SOFTWARE\Wipro\Computer
                 Set-Values -Path HKLM:\SOFTWARE\Wipro\Computer -Headers $Headers -Item $Item
@@ -202,7 +227,7 @@ foreach ($Item in $Input){
                 Set-Values -Path HKLM:\SOFTWARE\Wipro\Computer -Headers $Headers -Item $Item
             }
         }
-        Invoke-Command -ComputerName $Data.ServerName -ScriptBlock $ScriptBlock -ArgumentList $Headers,$Data # -Credential $Credential
+        Invoke-Command -ComputerName $Data.ServerName -ScriptBlock $ScriptBlock -ArgumentList $Headers,$Data -Credential $Credential
     }) | Out-Null    
     [void]$PowerShell.AddParameters($Parameters)
 
