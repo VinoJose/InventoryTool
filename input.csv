@@ -1,0 +1,2 @@
+ServerName,Site,Build,Zone,BuildType,cmenv,ApplicationName,ApplicationDescription,StorageType,TAO,FAO,cmusergroup,PNUM
+localhost,SiteValue,BuildValue,ZoneValue,BuildTypeValue,cmenvValue,ApplicationNameValue,ApplicationDescriptionValue,StorageTypeValue,TAOValue,FAOValue,cmusergroupValue,PNUMValue
